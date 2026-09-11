@@ -15,16 +15,15 @@ const openai = new OpenAI({
 async function askAI(query) {
   try {
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "groq/openai/gpt-oss-120b",
       messages: [
         {
           role: "system",
           content:
-            "You are a helpful Minecraft assistant. Keep answers short and concise (under 100 characters). Answer based on Minecraft Bedrock edition version 1.26.45 knowledge (dont use special characters in your answers like emoji, markdown, etc use only text).",
+            "You are a helpful Minecraft assistant. Keep answers short and concise (under 100 characters if possible). Answer based on Minecraft Bedrock edition (version 1.26.45) knowledge (dont use special characters in your answers like emoji, markdown, etc use only text).",
         },
         { role: "user", content: query },
       ],
-      max_tokens: 200,
       temperature: 0.7,
     });
     return (
@@ -56,23 +55,6 @@ function sendChat(message) {
   } catch (err) {
     console.error("Error sending chat:", err?.message ?? err);
   }
-}
-
-function splitMessage(text, maxLen = 150) {
-  if (text.length <= maxLen) return [text];
-  const chunks = [];
-  let remaining = text;
-  while (remaining.length > 0) {
-    if (remaining.length <= maxLen) {
-      chunks.push(remaining);
-      break;
-    }
-    let cut = remaining.lastIndexOf(" ", maxLen);
-    if (cut === -1 || cut === 0) cut = maxLen;
-    chunks.push(remaining.slice(0, cut));
-    remaining = remaining.slice(cut).trim();
-  }
-  return chunks;
 }
 
 function connectBot() {
@@ -116,14 +98,7 @@ function connectBot() {
       const answer = await askAI(question);
       console.log(`[GAME] AI answer: ${answer}`);
 
-      const parts = splitMessage(answer);
-
-      for (let i = 0; i < parts.length; i++) {
-        sendChat(parts[i]);
-        if (i < parts.length - 1) {
-          await new Promise((r) => setTimeout(r, 1000));
-        }
-      }
+      sendChat(answer);
 
       console.log(`[GAME] Replied to ${packet.source_name}: ${answer}`);
     } catch (err) {
