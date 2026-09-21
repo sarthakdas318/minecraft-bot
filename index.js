@@ -140,6 +140,8 @@ function connectBot() {
   });
 
   client.on("error", (err) => {
+    if (err.message?.includes("Missing characters in string")) return;
+    if (err.message?.includes("Read error")) return;
     console.error("Client error:", err.message);
   });
 
