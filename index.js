@@ -7,9 +7,17 @@ const app = express();
 let client;
 let isConnected = false;
 
+const baseURL = process.env.OPENAI_BASE_URL;
+const apiKey = process.env.OPENAI_API_KEY;
+
+if (!baseURL || !apiKey) {
+  console.error("Missing OpenAI API key or base URL.");
+  process.exit(1);
+}
+
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  baseURL: process.env.OPENAI_BASE_URL,
+  baseURL: baseURL,
+  apiKey: apiKey,
 });
 
 async function askAI(query) {
@@ -61,9 +69,10 @@ function connectBot() {
   client = bedrockProtocol.createClient({
     host: process.env.MC_HOST, // Minecraft server IP or hostname
     port: Number(process.env.MC_PORT), // Minecraft server port
-    username: process.env.MC_USERNAME, // Minecraft username
-    offline: process.env.MC_OFFLINE === "true", // set to true for offline mode
-    profilesFolder: "./profiles", // stores login tokens
+    username: process.env.MC_USERNAME || "bot", // Minecraft username
+    offline: true, // set to true for offline mode
+    version: "1.26.51", // Minecraft version
+    // profilesFolder: "./profiles", // stores login tokens
   });
 
   client.on("connect", () => {
@@ -343,7 +352,9 @@ app.get("/", async (_, res) => {
         </div>
 
         <div class="refresh">
-          Page generated at ${new Date().toLocaleString()}
+          Page generated at ${new Date().toLocaleString("en-US", {
+            timeZone: "Asia/Kolkata",
+          })}
         </div>
 
       </div>
@@ -363,4 +374,4 @@ connectBot();
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT,"0.0.0.0", () => console.log(`Server started on port ${PORT}`));
+app.listen(PORT,"0.0.0.0", () => console.log(`Server started on port: ${PORT}`));
