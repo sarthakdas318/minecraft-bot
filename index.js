@@ -23,7 +23,7 @@ const openai = new OpenAI({
 async function askAI(query) {
   try {
     const completion = await openai.chat.completions.create({
-      model: "groq/openai/gpt-oss-120b",
+      model: process.env.MODEL || "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
