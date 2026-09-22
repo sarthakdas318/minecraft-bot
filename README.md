@@ -41,13 +41,14 @@ A Minecraft Bedrock Edition bot powered by OpenAI that connects to your server a
 4. Configure your environment variables in `.env`:
 
    ```env
-   MC_HOST=""          # your server IP
-   MC_PORT=""          # your server port
-   MC_USERNAME=""      # bot name
+   MC_HOST=""            # your server IP
+   MC_PORT=""            # your server port
+   MC_USERNAME=""        # bot name
    MC_PLATFORM="bedrock" # options: [bedrock or java]
-   OPENAI_BASE_URL=""  # any OpenAI compatible API endpoint
-   OPENAI_API_KEY=""   # your AI API key
-   AI_MODEL=""         # your AI model (e.g. gpt-3.5-turbo, gpt-4) default: gpt-3.5-turbo
+   MC_VERSION=""         # optional: override auto-detected version
+   OPENAI_BASE_URL=""    # any OpenAI compatible API endpoint
+   OPENAI_API_KEY=""     # your AI API key
+   AI_MODEL=""           # your AI model (e.g. gpt-4, gpt-3.5-turbo) default: auto
    ```
 
 5. Start the bot:
@@ -55,9 +56,6 @@ A Minecraft Bedrock Edition bot powered by OpenAI that connects to your server a
    ```bash
    npm start
    ```
-
-> [!NOTE]
-> **Version Compatibility:** This bot works with Minecraft Bedrock **1.26.45** out of the box. If you need to connect to a server running **1.26.51**, you must patch the `bedrock-protocol` and `minecraft-data` packages. See [UPDATE.md](UPDATE.md) for detailed patching instructions.
 
 ## Usage
 
@@ -71,12 +69,32 @@ Once running, the bot connects to your Minecraft server automatically.
 
 ```
 minecraft-bot/
-├── index.js          # Main application (bot logic + Express server)
-├── package.json      # Dependencies and scripts
-├── .env.sample       # Environment variable template
-├── .gitignore        # Git ignore rules
-├── UPDATE.md         # Patch instructions for Minecraft 1.26.51
-└── profiles/         # Cached authentication tokens
+├── src/
+│   ├── server.js                     # Entry point — starts Express + bot
+│   ├── bot/
+│   │   ├── BotManager.js             # Connection, lifecycle & auto-reconnect
+│   │   ├── index.js                  # Bot exports
+│   │   └── handlers/
+│   │       └── chat.handler.js       # `bot <question>` handler
+│   ├── config/
+│   │   ├── index.js                  # Env config & validation
+│   │   └── constants.js              # Default constants & AI prompt
+│   ├── services/
+│   │   ├── ai.service.js             # OpenAI integration
+│   │   └── serverStatus.service.js   # Server ping & dynamic version resolution
+│   ├── utils/
+│   │   └── logger.js                 # Structured logger
+│   └── web/
+│       ├── app.js                    # Express app factory
+│       ├── routes/
+│       │   ├── health.routes.js      # GET /health
+│       │   └── dashboard.routes.js   # GET /
+│       └── views/
+│           └── dashboard.view.js     # Dashboard HTML template
+├── package.json                      # Dependencies and scripts
+├── .env.sample                       # Environment variable template
+├── .gitignore                        # Git ignore rules
+└── profiles/                         # Cached auth tokens (gitignored)
 ```
 
 ## Environment Variables
@@ -84,21 +102,23 @@ minecraft-bot/
 | Variable | Required | Default | Description |
 |---|---|---|---|
 | `MC_HOST` | Yes | - | Minecraft server IP or hostname |
-| `MC_PORT` | Yes | - | Minecraft server port |
-| `MC_USERNAME` | No | `bot` | Bot's in-game username |
+| `MC_PORT` | No | `19132` | Minecraft server port |
+| `MC_USERNAME` | No | `surajit_bot` | Bot's in-game username |
 | `MC_PLATFORM` | No | `bedrock` | Server platform (`bedrock` or `java`) |
+| `MC_VERSION` | No | _(auto)_ | Minecraft version override (auto-resolved from server ping if empty) |
 | `OPENAI_BASE_URL` | Yes | - | OpenAI-compatible API endpoint |
 | `OPENAI_API_KEY` | Yes | - | Your API key |
-| `AI_MODEL` | No | `gpt-3.5-turbo` | Model to use for chat completions |
+| `AI_MODEL` | No | `auto` | Model to use for chat completions |
 | `PORT` | No | `3000` | Web server port |
+| `HOST` | No | `0.0.0.0` | Web server host |
 
 ## How It Works
 
-1. The bot connects to the Minecraft server using the `bedrock-protocol` library.
-2. It listens for incoming chat messages.
-3. When a message starts with `bot `, the rest of the message is sent to the OpenAI API.
+1. The bot resolves the Minecraft version dynamically via the ping API (`src/services/serverStatus.service.js`) or `MC_VERSION` if set, then connects using `bedrock-protocol` (`src/bot/BotManager.js`).
+2. It listens for incoming `text` (chat) packets via `src/bot/handlers/chat.handler.js`.
+3. When a message starts with `bot `, the rest of the message is sent to the OpenAI-compatible API (`src/services/ai.service.js`).
 4. The AI response is sent back to the server as a chat message.
-5. If the bot dies or disconnects, it waits 30 seconds and reconnects automatically.
+5. If the bot dies or disconnects, `BotManager` waits 30 seconds and reconnects automatically. The web dashboard (`src/web/`) exposes bot/server status at `GET /` and `GET /health`.
 
 ## License
 
