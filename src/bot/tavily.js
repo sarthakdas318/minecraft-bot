@@ -12,7 +12,6 @@ export async function askTavily(query) {
       includeAnswer: "basic",
       searchDepth: "advanced",
     });
-    console.log(response.answer);
     // Tavily returns { answer, results, ... } - prefer answer, fallback to results snippet
     // if (response.answer) console.log('Tavily answer:', response.answer);
     if (response.answer) return response.answer;
