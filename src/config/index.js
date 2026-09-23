@@ -22,10 +22,7 @@ export const config = {
   ai: {
     baseURL: requireEnv("OPENAI_BASE_URL"),
     apiKey: requireEnv("OPENAI_API_KEY"),
-    model:
-      process.env.AI_MODEL ||
-      process.env.MODEL || // legacy compat
-      BOT_CONSTANTS.DEFAULT_AI_MODEL,
+    model: process.env.AI_MODEL || BOT_CONSTANTS.DEFAULT_AI_MODEL,
   },
   server: {
     port: Number(process.env.PORT) || BOT_CONSTANTS.DEFAULT_PORT,
