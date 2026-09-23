@@ -94,7 +94,7 @@ export async function askAI(query) {
             args = { query };
           }
           const searchQuery = args.query || query;
-          logger.info(`AI requested askTavily: "${searchQuery}"`);
+          // logger.info(`AI requested askTavily: "${searchQuery}"`);
           const result = await askTavily(searchQuery);
 
           messages.push({

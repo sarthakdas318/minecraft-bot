@@ -14,7 +14,9 @@ export async function askTavily(query) {
     });
     console.log(response.answer);
     // Tavily returns { answer, results, ... } - prefer answer, fallback to results snippet
+    // if (response.answer) console.log('Tavily answer:', response.answer);
     if (response.answer) return response.answer;
+
     if (response.results?.length) {
       return response.results
         .slice(0, 3)
