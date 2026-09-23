@@ -48,8 +48,8 @@ export class BotManager {
       port: Number(config.mc.port),
       username: config.mc.username,
       offline: config.mc.offline,
-      // undefined lets bedrock-protocol negotiate / use supported version dynamically
-      version: version || undefined,
+      // profilesFolder: "../../profiles",
+      version: version || undefined, // undefined lets bedrock-protocol negotiate / use supported version dynamically
     });
 
     this.#registerEvents();
