@@ -46,10 +46,10 @@ export class BotManager {
     this.#client = bedrockProtocol.createClient({
       host: config.mc.host,
       port: Number(config.mc.port),
-      username: config.mc.username,
-      offline: config.mc.offline,
-      // profilesFolder: "../../profiles",
-      version: version || undefined, // undefined lets bedrock-protocol negotiate / use supported version dynamically
+      // username: config.mc.username,
+      // offline: config.mc.offline,
+      profilesFolder: "../../profiles",
+      // version: version || undefined, // undefined lets bedrock-protocol negotiate / use supported version dynamically
     });
 
     this.#registerEvents();
