@@ -3,6 +3,7 @@ import { config } from "../config/index.js";
 import { AI_SYSTEM_PROMPT } from "../config/constants.js";
 import { logger } from "../utils/logger.js";
 import { askTavily } from "../bot/tavily.js";
+import { getHistory, addMessage } from "./conversation.service.js";
 
 let openai = null;
 
@@ -49,6 +50,7 @@ export async function askAI(query) {
 
     const messages = [
       { role: "system", content: TOOL_SYSTEM_PROMPT },
+      ...getHistory(),
       { role: "user", content: query },
     ];
 
@@ -126,7 +128,9 @@ export async function askAI(query) {
       if (!msg?.tool_calls?.length) break;
     }
 
-    return msg?.content?.trim() || "No response from AI.";
+    const answer = msg?.content?.trim() || "No response from AI.";
+    addMessage("assistant", answer);
+    return answer;
   } catch (err) {
     logger.error("AI API error:", err?.message);
     return "Sorry, I couldn't process your request right now.";

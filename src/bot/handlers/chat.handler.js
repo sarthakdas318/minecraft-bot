@@ -1,5 +1,6 @@
 import { askAI } from "../../services/ai.service.js";
 import { logger } from "../../utils/logger.js";
+import { addMessage } from "../../services/conversation.service.js";
 
 export function createChatHandler(getClient, sendChat) {
   return async (packet) => {
@@ -23,6 +24,7 @@ export function createChatHandler(getClient, sendChat) {
 
       logger.game(`${packet.source_name} asked: ${question}`);
 
+      addMessage("user", question);
       const answer = await askAI(question);
       logger.game(`AI answer: ${answer}`);
 
